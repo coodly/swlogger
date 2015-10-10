@@ -16,16 +16,11 @@
 
 import Foundation
 
-public class Logger {
-    public static let sharedInstance = Logger()
-    private var logLevel:Log.Level = Log.Level.NONE
+internal class Logger {
+    internal static let sharedInstance = Logger()
     private var outputs = [LogOutput]()
-    
-    public func setLogLevel(level:Log.Level) {
-        logLevel = level
-    }
-    
-    public func addOutput(output:LogOutput) {
+        
+    internal func addOutput(output:LogOutput) {
         outputs.append(output)
     }
     
@@ -46,7 +41,7 @@ public class Logger {
     }
 
     private func logMessage(message:String, level:Log.Level, prefix:String) {
-        if level.rawValue < logLevel.rawValue {
+        if level.rawValue < Log.logLevel.rawValue {
             return
         }
         

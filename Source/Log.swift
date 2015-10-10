@@ -20,8 +20,26 @@ public class Log {
     public enum Level: Int {
         case VERBOSE = 0, DEBUG, INFO, ERROR, NONE
     }
+
+    public static var logLevel = Level.NONE
     
     public class func info(message:String) {
         Logger.sharedInstance.info(message)
+    }
+
+    public class func debug(message:String) {
+        Logger.sharedInstance.debug(message)
+    }
+    
+    public class func error(message:String) {
+        Logger.sharedInstance.error(message)
+    }
+
+    public class func verbose(message:String) {
+        Logger.sharedInstance.verbose(message)
+    }
+    
+    public class func addOutput(output:LogOutput) {
+        Logger.sharedInstance.addOutput(output)
     }
 }
