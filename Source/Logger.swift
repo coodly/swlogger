@@ -24,29 +24,36 @@ internal class Logger {
         outputs.append(output)
     }
     
-    internal func verbose(message:String) {
-        logMessage(message, level: Log.Level.VERBOSE, prefix:"VERBOSE")
-    }
-
-    internal func debug(message:String) {
-        logMessage(message, level: Log.Level.DEBUG, prefix:"DEBUG")
-    }
-
-    internal func info(message:String) {
-        logMessage(message, level: Log.Level.INFO, prefix:"INFO")
-    }
-
-    internal func error(message:String) {
-        logMessage(message, level: Log.Level.ERROR, prefix:"ERROR")
-    }
-
-    private func logMessage(message:String, level:Log.Level, prefix:String) {
+    internal func log<T>(object: T, file: String, function: String, line: Int, level: Log.Level) {
         if level.rawValue < Log.logLevel.rawValue {
             return
         }
-        
+
+        let levelString = levelToString(level)
+        var cleanedFile = "-"
+        let fileURL = NSURL(fileURLWithPath: file, isDirectory: false)
+        if let cleaned = fileURL.lastPathComponent {
+            cleanedFile = cleaned
+        }
+        let message = "\(levelString) - \(cleanedFile).\(function):\(line) - \(object)"
+
         for output: LogOutput in outputs {
-            output.printMessage("\(prefix) \(message)")
+            output.printMessage(message)
+        }
+    }
+    
+    private func levelToString(level: Log.Level) -> String {
+        switch(level) {
+        case .ERROR:
+            return "E"
+        case .INFO:
+            return "I"
+        case .DEBUG:
+            return "D"
+        case .VERBOSE:
+            return "V"
+        default:
+            return ""
         }
     }
 }
