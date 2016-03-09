@@ -29,13 +29,11 @@ internal class Logger {
             return
         }
 
+        let time = timeFormatter.stringFromDate(NSDate())
         let levelString = levelToString(level)
-        var cleanedFile = "-"
         let fileURL = NSURL(fileURLWithPath: file, isDirectory: false)
-        if let cleaned = fileURL.lastPathComponent {
-            cleanedFile = cleaned
-        }
-        let message = "\(levelString) - \(cleanedFile).\(function):\(line) - \(object)"
+        let cleanedFile = fileURL.lastPathComponent ?? "-"
+        let message = "\(time) - \(levelString) - \(cleanedFile).\(function):\(line) - \(object)"
 
         for output: LogOutput in outputs {
             output.printMessage(message)
@@ -56,4 +54,10 @@ internal class Logger {
             return ""
         }
     }
+    
+    private lazy var timeFormatter: NSDateFormatter = {
+       let formatter = NSDateFormatter()
+        formatter.dateFormat = "HH:mm:ss.SSS"
+        return formatter
+    }()
 }

@@ -37,7 +37,8 @@ public class FileOutput: LogOutput {
         }
         
         let dir: NSURL = NSFileManager.defaultManager().URLsForDirectory(NSSearchPathDirectory.DocumentDirectory, inDomains: NSSearchPathDomainMask.UserDomainMask).last as NSURL!
-        let fileURL = dir.URLByAppendingPathComponent("log.txt")
+        let time = dateFormatter.stringFromDate(NSDate())
+        let fileURL = dir.URLByAppendingPathComponent("\(time).txt")
         
         makeSureFileExists(fileURL)
         
@@ -66,4 +67,10 @@ public class FileOutput: LogOutput {
         
         NSData().writeToURL(atURL, atomically: true)
     }
+    
+    private lazy var dateFormatter: NSDateFormatter = {
+        let formatter = NSDateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd-HH-mm"
+        return formatter
+    }()
 }
