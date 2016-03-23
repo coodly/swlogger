@@ -23,19 +23,19 @@ public class Log {
 
     public static var logLevel = Level.NONE
     
-    public class func info<T>(object: T, file: String = __FILE__, function: String = __FUNCTION__, line: Int = __LINE__) {
+    public class func info<T>(object: T, file: String = #file, function: String = #function, line: Int = #line) {
         Logger.sharedInstance.log(object, file: file, function: function, line: line, level: .INFO)
     }
 
-    public class func debug<T>(object: T, file: String = __FILE__, function: String = __FUNCTION__, line: Int = __LINE__) {
+    public class func debug<T>(object: T, file: String = #file, function: String = #function, line: Int = #line) {
         Logger.sharedInstance.log(object, file: file, function: function, line: line, level: .DEBUG)
     }
     
-    public class func error<T>(object: T, file: String = __FILE__, function: String = __FUNCTION__, line: Int = __LINE__) {
+    public class func error<T>(object: T, file: String = #file, function: String = #function, line: Int = #line) {
         Logger.sharedInstance.log(object, file: file, function: function, line: line, level: .ERROR)
     }
 
-    public class func verbose<T>(object: T, file: String = __FILE__, function: String = __FUNCTION__, line: Int = __LINE__) {
+    public class func verbose<T>(object: T, file: String = #file, function: String = #function, line: Int = #line) {
         Logger.sharedInstance.log(object, file: file, function: function, line: line, level: .VERBOSE)
     }
     
