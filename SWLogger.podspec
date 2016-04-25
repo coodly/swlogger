@@ -8,8 +8,10 @@ Pod::Spec.new do |s|
   s.source = { :git => 'git@github.com:coodly/swlogger.git', :tag => s.version }
 
   s.ios.deployment_target = '8.0'
+  s.tvos.deployment_target = '9.0'
 
   s.source_files = 'Source/*.swift'
+  s.tvos.exclude_files = ['Source/ShakeWindow.swift']
 
   s.requires_arc = true
 end
