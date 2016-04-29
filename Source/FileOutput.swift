@@ -18,9 +18,10 @@ import Foundation
 
 public class FileOutput: LogOutput {
     private var fileHandle: NSFileHandle!
+    private let saveInDirectory: NSSearchPathDirectory
 
-    public init() {
-        
+    public init(saveInDirectory: NSSearchPathDirectory = .DocumentDirectory) {
+        self.saveInDirectory = saveInDirectory
     }
     
     public func printMessage(message: String) {
@@ -35,10 +36,12 @@ public class FileOutput: LogOutput {
         if let handle = fileHandle {
             return handle
         }
-        
-        let dir: NSURL = NSFileManager.defaultManager().URLsForDirectory(NSSearchPathDirectory.DocumentDirectory, inDomains: NSSearchPathDomainMask.UserDomainMask).last as NSURL!
+
+        let dir = NSFileManager.defaultManager().URLsForDirectory(saveInDirectory, inDomains: NSSearchPathDomainMask.UserDomainMask).last as NSURL!
         let time = dateFormatter.stringFromDate(NSDate())
-        let fileURL = dir.URLByAppendingPathComponent("\(time).txt")
+        let logsFolder = dir.URLByAppendingPathComponent("Logs")
+        createFolder(logsFolder)
+        let fileURL = logsFolder.URLByAppendingPathComponent("\(time).txt")
         
         makeSureFileExists(fileURL)
         
@@ -57,6 +60,18 @@ public class FileOutput: LogOutput {
             print("\(error)")
             
             return nil
+        }
+    }
+
+    private func createFolder(path: NSURL) {
+        if NSFileManager.defaultManager().fileExistsAtPath(path.path!) {
+            return
+        }
+        
+        do {
+            try NSFileManager.defaultManager().createDirectoryAtURL(path, withIntermediateDirectories: true, attributes: nil)
+        } catch let error as NSError {
+            print("Create logs folder error \(error)")
         }
     }
     
