@@ -9,9 +9,11 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '8.0'
   s.tvos.deployment_target = '9.0'
+  s.osx.deployment_target = '10.11'
 
   s.source_files = 'Source/*.swift'
   s.tvos.exclude_files = ['Source/ShakeWindow.swift']
+  s.osx.exclude_files = ['Source/ShakeWindow.swift']
 
   s.requires_arc = true
 end
