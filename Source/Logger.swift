@@ -18,7 +18,7 @@ import Foundation
 
 internal class Logger {
     internal static let sharedInstance = Logger()
-    private var outputs = [LogOutput]()
+    internal var outputs = [LogOutput]()
         
     internal func addOutput(output:LogOutput) {
         outputs.append(output)

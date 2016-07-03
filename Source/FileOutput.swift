@@ -19,6 +19,23 @@ import Foundation
 public class FileOutput: LogOutput {
     private var fileHandle: NSFileHandle!
     private let saveInDirectory: NSSearchPathDirectory
+    internal lazy var logsFolder: NSURL = {
+        let urls = NSFileManager.defaultManager().URLsForDirectory(self.saveInDirectory, inDomains: .UserDomainMask)
+        let last = urls.last!
+        let identifier = NSBundle.mainBundle().bundleIdentifier!
+        let logsIdentifier = identifier.stringByAppendingString(".logs")
+        #if swift(>=2.3)
+            let logsFolder = last.URLByAppendingPathComponent(logsIdentifier)!
+        #else
+            let logsFolder = last.URLByAppendingPathComponent(logsIdentifier)
+        #endif
+        do {
+            try NSFileManager.defaultManager().createDirectoryAtURL(logsFolder, withIntermediateDirectories: true, attributes: nil)
+        } catch let error as NSError {
+            print("Create db folder error \(error)")
+        }
+        return logsFolder
+    }()
 
     public init(saveInDirectory: NSSearchPathDirectory = .DocumentDirectory) {
         self.saveInDirectory = saveInDirectory
@@ -37,16 +54,13 @@ public class FileOutput: LogOutput {
             return handle
         }
 
-        let dir = NSFileManager.defaultManager().URLsForDirectory(saveInDirectory, inDomains: NSSearchPathDomainMask.UserDomainMask).last as NSURL!
+        let dir = logsFolder
         let time = dateFormatter.stringFromDate(NSDate())
         #if swift(>=2.3)
-            let logsFolder = dir.URLByAppendingPathComponent("Logs")!
             let fileURL = logsFolder.URLByAppendingPathComponent("\(time).txt")!
         #else
-            let logsFolder = dir.URLByAppendingPathComponent("Logs")
             let fileURL = logsFolder.URLByAppendingPathComponent("\(time).txt")
         #endif        
-        createFolder(logsFolder)
         
         makeSureFileExists(fileURL)
         

@@ -26,14 +26,8 @@ public class ShakeWindow: UIWindow {
     }
     
     private func presentMailController() {
-        let dir: NSURL = NSFileManager.defaultManager().URLsForDirectory(NSSearchPathDirectory.DocumentDirectory, inDomains: NSSearchPathDomainMask.UserDomainMask).last as NSURL!
-        #if swift(>=2.3)
-            let fileURL = dir.URLByAppendingPathComponent("log.txt")!
-        #else
-            let fileURL = dir.URLByAppendingPathComponent("log.txt")
-        #endif
-        
-        let activityController = UIActivityViewController(activityItems: ["Sent this to jaanussiim@gmail.com", fileURL], applicationActivities: nil)
-        rootViewController?.presentViewController(activityController, animated: true, completion: nil)
+        let logsController = LogsViewController()
+        let navigation = UINavigationController(rootViewController: logsController)
+        rootViewController?.presentViewController(navigation, animated: true, completion: nil)
     }
 }
