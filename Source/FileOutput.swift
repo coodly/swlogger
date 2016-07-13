@@ -54,7 +54,6 @@ public class FileOutput: LogOutput {
             return handle
         }
 
-        let dir = logsFolder
         let time = dateFormatter.stringFromDate(NSDate())
         #if swift(>=2.3)
             let fileURL = logsFolder.URLByAppendingPathComponent("\(time).txt")!
