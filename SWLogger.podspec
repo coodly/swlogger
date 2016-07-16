@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'SWLogger'
-  s.version = '0.1.0'
+  s.version = '0.2.0'
   s.license = 'Apache 2'
   s.summary = 'Logging in Swift'
   s.homepage = 'https://github.com/coodly/swlogger'
