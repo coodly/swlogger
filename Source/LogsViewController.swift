@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#if os(iOS)
 import UIKit
 
 struct LogFile {
@@ -100,3 +101,4 @@ private extension LogsViewController {
         }
     }
 }
+#endif
