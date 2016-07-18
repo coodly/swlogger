@@ -67,6 +67,11 @@ class LogsViewController: UITableViewController {
         let file = files[indexPath.row]
         
         let activityController = UIActivityViewController(activityItems: [file.path], applicationActivities: nil)
+        
+        let rect = tableView.rectForRowAtIndexPath(indexPath)
+        activityController.popoverPresentationController?.sourceView = tableView
+        activityController.popoverPresentationController?.sourceRect = rect
+        
         presentViewController(activityController, animated: true, completion: nil)
     }
 }
