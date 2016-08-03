@@ -17,54 +17,47 @@
 import Foundation
 
 public class FileOutput: LogOutput {
-    private var fileHandle: NSFileHandle!
-    private let saveInDirectory: NSSearchPathDirectory
-    internal lazy var logsFolder: NSURL = {
-        let urls = NSFileManager.defaultManager().URLsForDirectory(self.saveInDirectory, inDomains: .UserDomainMask)
+    private var fileHandle: FileHandle!
+    private let saveInDirectory: FileManager.SearchPathDirectory
+    internal lazy var logsFolder: URL = {
+        let urls = FileManager.default.urls(for: self.saveInDirectory, in: .userDomainMask)
         let last = urls.last!
-        let identifier = NSBundle.mainBundle().bundleIdentifier!
-        let logsIdentifier = identifier.stringByAppendingString(".logs")
-        #if swift(>=2.3)
-            let logsFolder = last.URLByAppendingPathComponent(logsIdentifier)!
-        #else
-            let logsFolder = last.URLByAppendingPathComponent(logsIdentifier)
-        #endif
+        let identifier = Bundle.main.bundleIdentifier!
+        let logsIdentifier = identifier + ".logs"
+        let logsFolder = last.appendingPathComponent(logsIdentifier)
+
         do {
-            try NSFileManager.defaultManager().createDirectoryAtURL(logsFolder, withIntermediateDirectories: true, attributes: nil)
+            try FileManager.default.createDirectory(at: logsFolder, withIntermediateDirectories: true, attributes: nil)
         } catch let error as NSError {
             print("Create db folder error \(error)")
         }
         return logsFolder
     }()
 
-    public init(saveInDirectory: NSSearchPathDirectory = .DocumentDirectory) {
+    public init(saveInDirectory: FileManager.SearchPathDirectory = .documentDirectory) {
         self.saveInDirectory = saveInDirectory
     }
     
-    public func printMessage(message: String) {
+    public func printMessage(_ message: String) {
         let written = "\(message)\n"
-        let data = written.dataUsingEncoding(NSUTF8StringEncoding)!
+        let data = written.data(using: String.Encoding.utf8)!
         if let handle = handle() {
-            handle.writeData(data)
+            handle.write(data)
         }
     }
     
-    private func handle() -> NSFileHandle? {
+    private func handle() -> FileHandle? {
         if let handle = fileHandle {
             return handle
         }
 
-        let time = dateFormatter.stringFromDate(NSDate())
-        #if swift(>=2.3)
-            let fileURL = logsFolder.URLByAppendingPathComponent("\(time).txt")!
-        #else
-            let fileURL = logsFolder.URLByAppendingPathComponent("\(time).txt")
-        #endif        
+        let time = dateFormatter.string(from: Date())
+        let fileURL = logsFolder.appendingPathComponent("\(time).txt")
         
         makeSureFileExists(fileURL)
         
         do {
-            if let opened: NSFileHandle = try NSFileHandle(forWritingToURL: fileURL) {
+            if let opened: FileHandle = try FileHandle(forWritingTo: fileURL) {
                 opened.seekToEndOfFile()
                 fileHandle = opened
                 
@@ -81,28 +74,28 @@ public class FileOutput: LogOutput {
         }
     }
 
-    private func createFolder(path: NSURL) {
-        if NSFileManager.defaultManager().fileExistsAtPath(path.path!) {
+    private func createFolder(_ path: URL) {
+        if FileManager.default.fileExists(atPath: path.path) {
             return
         }
         
         do {
-            try NSFileManager.defaultManager().createDirectoryAtURL(path, withIntermediateDirectories: true, attributes: nil)
+            try FileManager.default.createDirectory(at: path, withIntermediateDirectories: true, attributes: nil)
         } catch let error as NSError {
             print("Create logs folder error \(error)")
         }
     }
     
-    private func makeSureFileExists(atURL: NSURL) {
-        if NSFileManager.defaultManager().fileExistsAtPath(atURL.path!) {
+    private func makeSureFileExists(_ atURL: URL) {
+        if FileManager.default.fileExists(atPath: atURL.path) {
             return
         }
         
-        NSData().writeToURL(atURL, atomically: true)
+        try? Data().write(to: atURL, options: [.atomicWrite])
     }
     
-    private lazy var dateFormatter: NSDateFormatter = {
-        let formatter = NSDateFormatter()
+    private lazy var dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd-HH-mm"
         return formatter
     }()

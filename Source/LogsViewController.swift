@@ -19,11 +19,11 @@ import UIKit
 
 struct LogFile {
     let name: String
-    let path: NSURL
+    let path: URL
 }
 
 private extension Selector {
-    static let dismiss = #selector(LogsViewController.dismiss)
+    static let dismiss = #selector(LogsViewController.dismissLogsController)
 }
 
 class LogsViewController: UITableViewController {
@@ -32,59 +32,59 @@ class LogsViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Done, target: self, action: .dismiss)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: .dismiss)
     }
     
-    @objc private func dismiss() {
-        dismissViewControllerAnimated(true, completion: nil)
+    @objc private func dismissLogsController() {
+        self.dismiss(animated: true)
     }
 
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         listFiles()
     }
 
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
 
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return files.count
     }
 
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let reuseIdentifier = "reuseIdentifier"
-        let cell = tableView.dequeueReusableCellWithIdentifier(reuseIdentifier) ?? UITableViewCell(style: .Default, reuseIdentifier: reuseIdentifier)
-        let file = files[indexPath.row]
+        let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier) ?? UITableViewCell(style: .default, reuseIdentifier: reuseIdentifier)
+        let file = files[(indexPath as NSIndexPath).row]
         cell.textLabel?.text = file.name
         return cell
     }
 
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
         
-        let file = files[indexPath.row]
+        let file = files[(indexPath as NSIndexPath).row]
         
         let activityController = UIActivityViewController(activityItems: [file.path], applicationActivities: nil)
         
-        let rect = tableView.rectForRowAtIndexPath(indexPath)
+        let rect = tableView.rectForRow(at: indexPath)
         activityController.popoverPresentationController?.sourceView = tableView
         activityController.popoverPresentationController?.sourceRect = rect
         
-        presentViewController(activityController, animated: true, completion: nil)
+        present(activityController, animated: true, completion: nil)
     }
 }
 
 private extension LogsViewController {
     func listFiles() {
-        var folder: NSURL?
+        var folder: URL?
         for output in Logger.sharedInstance.outputs {
             guard let fileOutput = output as? FileOutput else {
                 continue
             }
             
-            folder = fileOutput.logsFolder
+            folder = fileOutput.logsFolder as URL
             break
         }
         
@@ -94,10 +94,10 @@ private extension LogsViewController {
         }
         
         do {
-            let files = try NSFileManager.defaultManager().contentsOfDirectoryAtURL(logsFolder, includingPropertiesForKeys: nil, options: [.SkipsHiddenFiles, .SkipsPackageDescendants, .SkipsSubdirectoryDescendants]).reverse()
+            let files = try FileManager.default.contentsOfDirectory(at: logsFolder, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles, .skipsPackageDescendants, .skipsSubdirectoryDescendants]).reversed()
             
             for file in files {
-                let logFile = LogFile(name: file.lastPathComponent!, path: file)
+                let logFile = LogFile(name: file.lastPathComponent, path: file)
                 self.files.append(logFile)
             }
             

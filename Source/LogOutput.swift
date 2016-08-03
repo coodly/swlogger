@@ -17,5 +17,5 @@
 import Foundation
 
 public protocol LogOutput {
-    func printMessage(message:String)
+    func printMessage(_ message:String)
 }

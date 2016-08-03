@@ -17,17 +17,17 @@
 import Foundation
 
 public class ShakeWindow: UIWindow {
-    public override func motionEnded(motion: UIEventSubtype, withEvent event: UIEvent?) {
-        if motion == .MotionShake {
+    public override func motionEnded(_ motion: UIEventSubtype, with event: UIEvent?) {
+        if motion == .motionShake {
             presentMailController()
         }
         
-        super.motionEnded(motion, withEvent: event)
+        super.motionEnded(motion, with: event)
     }
     
     private func presentMailController() {
         let logsController = LogsViewController()
         let navigation = UINavigationController(rootViewController: logsController)
-        rootViewController?.presentViewController(navigation, animated: true, completion: nil)
+        rootViewController?.present(navigation, animated: true, completion: nil)
     }
 }

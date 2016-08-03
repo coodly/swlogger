@@ -21,7 +21,7 @@ public class ConsoleOutput: LogOutput {
         
     }
     
-    public func printMessage(message: String) {
+    public func printMessage(_ message: String) {
         print(message)
     }
 }

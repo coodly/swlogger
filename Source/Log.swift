@@ -18,28 +18,28 @@ import Foundation
 
 public class Log {
     public enum Level: Int {
-        case VERBOSE = 0, DEBUG, INFO, ERROR, NONE
+        case verbose = 0, debug, info, error, none
     }
 
-    public static var logLevel = Level.NONE
+    public static var logLevel = Level.none
     
-    public class func info<T>(object: T, file: String = #file, function: String = #function, line: Int = #line) {
-        Logger.sharedInstance.log(object, file: file, function: function, line: line, level: .INFO)
+    public class func info<T>(_ object: T, file: String = #file, function: String = #function, line: Int = #line) {
+        Logger.sharedInstance.log(object, file: file, function: function, line: line, level: .info)
     }
 
-    public class func debug<T>(object: T, file: String = #file, function: String = #function, line: Int = #line) {
-        Logger.sharedInstance.log(object, file: file, function: function, line: line, level: .DEBUG)
+    public class func debug<T>(_ object: T, file: String = #file, function: String = #function, line: Int = #line) {
+        Logger.sharedInstance.log(object, file: file, function: function, line: line, level: .debug)
     }
     
-    public class func error<T>(object: T, file: String = #file, function: String = #function, line: Int = #line) {
-        Logger.sharedInstance.log(object, file: file, function: function, line: line, level: .ERROR)
+    public class func error<T>(_ object: T, file: String = #file, function: String = #function, line: Int = #line) {
+        Logger.sharedInstance.log(object, file: file, function: function, line: line, level: .error)
     }
 
-    public class func verbose<T>(object: T, file: String = #file, function: String = #function, line: Int = #line) {
-        Logger.sharedInstance.log(object, file: file, function: function, line: line, level: .VERBOSE)
+    public class func verbose<T>(_ object: T, file: String = #file, function: String = #function, line: Int = #line) {
+        Logger.sharedInstance.log(object, file: file, function: function, line: line, level: .verbose)
     }
     
-    public class func addOutput(output:LogOutput) {
+    public class func addOutput(_ output:LogOutput) {
         Logger.sharedInstance.addOutput(output)
     }
 }
