@@ -57,16 +57,11 @@ public class FileOutput: LogOutput {
         makeSureFileExists(fileURL)
         
         do {
-            if let opened: FileHandle = try FileHandle(forWritingTo: fileURL) {
-                opened.seekToEndOfFile()
-                fileHandle = opened
+            let opened: FileHandle = try FileHandle(forWritingTo: fileURL)
+            opened.seekToEndOfFile()
+            fileHandle = opened
                 
-                return fileHandle
-            } else {
-                print("Could not open log file 1")
-                
-                return nil
-            }
+            return fileHandle
         } catch let error as NSError {
             print("\(error)")
             

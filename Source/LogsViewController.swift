@@ -27,7 +27,7 @@ private extension Selector {
 }
 
 class LogsViewController: UITableViewController {
-    private var files = [LogFile]()
+    fileprivate var files = [LogFile]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,7 +35,7 @@ class LogsViewController: UITableViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: .dismiss)
     }
     
-    @objc private func dismissLogsController() {
+    @objc fileprivate func dismissLogsController() {
         self.dismiss(animated: true)
     }
 

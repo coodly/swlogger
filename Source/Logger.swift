@@ -32,7 +32,7 @@ internal class Logger {
         let time = timeFormatter.string(from: Date())
         let levelString = levelToString(level)
         let fileURL = URL(fileURLWithPath: file, isDirectory: false)
-        let cleanedFile = fileURL.lastPathComponent ?? "-"
+        let cleanedFile = fileURL.lastPathComponent
         let message = "\(time) - \(levelString) - \(cleanedFile).\(function):\(line) - \(object)"
 
         for output: LogOutput in outputs {
