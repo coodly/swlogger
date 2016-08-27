@@ -20,7 +20,7 @@ internal class Logger {
     internal static let sharedInstance = Logger()
     internal var outputs = [LogOutput]()
         
-    internal func addOutput(_ output:LogOutput) {
+    internal func add(output: LogOutput) {
         outputs.append(output)
     }
     

@@ -39,7 +39,7 @@ public class Log {
         Logger.sharedInstance.log(object, file: file, function: function, line: line, level: .verbose)
     }
     
-    public class func addOutput(_ output:LogOutput) {
-        Logger.sharedInstance.addOutput(output)
+    public class func add(output: LogOutput) {
+        Logger.sharedInstance.add(output: output)
     }
 }
