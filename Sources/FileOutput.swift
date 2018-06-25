@@ -40,9 +40,9 @@ public class FileOutput: LogOutput {
     
     public func printMessage(_ message: String) {
         let written = "\(message)\n"
-        let data = written.data(using: String.Encoding.utf8)!
-        if let handle = handle() {
-            handle.write(data)
+        let data = written.data(using: .utf8) ?? "<- No UTF8 data ->\n".data(using: .utf8)
+        if let handle = handle(), let write = data {
+            handle.write(write)
         }
     }
     
