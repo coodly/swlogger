@@ -95,7 +95,11 @@ public class FileOutput: LogOutput {
             return
         }
         
-        try? Data().write(to: atURL, options: [.atomicWrite])
+        var options: NSData.WritingOptions = []
+        #if os(macOS)
+        options.insert(.atomicWrite)
+        #endif
+        try? Data().write(to: atURL, options: options)
     }
     
     private lazy var dateFormatter: DateFormatter = {
