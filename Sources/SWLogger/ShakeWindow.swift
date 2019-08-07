@@ -16,6 +16,7 @@
 
 #if os(iOS)
 import Foundation
+import UIKit
 
 #if !swift(>=4.2)
 public extension UIEvent {
