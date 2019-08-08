@@ -1,15 +1,14 @@
 import XCTest
 @testable import SWLogger
 
-class SWLogger: XCTestCase {
+final class SWLoggerTests: XCTestCase {
     func testExample() {
-
+        // This is an example of a functional test case.
+        // Use XCTAssert and related functions to verify your tests produce the correct
+        // results.
     }
 
-
-    static var allTests : [(String, (swift_loggerTests) -> () throws -> Void)] {
-        return [
-            ("testExample", testExample),
-        ]
-    }
+    static var allTests = [
+        ("testExample", testExample),
+    ]
 }
