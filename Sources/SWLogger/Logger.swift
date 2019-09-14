@@ -21,22 +21,26 @@ internal class Logger {
     internal var outputs = [LogOutput]()
     private var cleaned = [String: String]()
         
+    private lazy var queue = DispatchQueue(label: "com.coodly.logging.queue")
+    
     internal func add(output: LogOutput) {
         outputs.append(output)
     }
     
     internal func log<T>(message: Message<T>) {
-        guard message.level.rawValue >= Log.level.rawValue else {
-            return
-        }
+        queue.sync {
+            guard message.level.rawValue >= Log.level.rawValue else {
+                return
+            }
 
-        let time = timeFormatter.string(from: message.time)
-        let levelString = levelToString(message.level)
-        let cleanedFile = cleaned(path: message.file)
-        let message = "\(time) - \(message.logger) - \(levelString) - \(cleanedFile).\(message.function):\(message.line) - \(message.object)"
+            let time = timeFormatter.string(from: message.time)
+            let levelString = levelToString(message.level)
+            let cleanedFile = cleaned(path: message.file)
+            let message = "\(time) - \(message.logger) - \(levelString) - \(cleanedFile).\(message.function):\(message.line) - \(message.object)"
 
-        for output: LogOutput in outputs {
-            output.printMessage(message)
+            for output: LogOutput in outputs {
+                output.printMessage(message)
+            }
         }
     }
         
