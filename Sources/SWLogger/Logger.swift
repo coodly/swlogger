@@ -24,22 +24,22 @@ internal class Logger {
         outputs.append(output)
     }
     
-    internal func log<T>(_ object: T, file: String, function: String, line: Int, level: Log.Level) {
-        if level.rawValue < Log.logLevel.rawValue {
+    internal func log<T>(message: Message<T>) {
+        if message.level.rawValue < Log.logLevel.rawValue {
             return
         }
 
-        let time = timeFormatter.string(from: Date())
-        let levelString = levelToString(level)
-        let fileURL = URL(fileURLWithPath: file, isDirectory: false)
+        let time = timeFormatter.string(from: message.time)
+        let levelString = levelToString(message.level)
+        let fileURL = URL(fileURLWithPath: message.file, isDirectory: false)
         let cleanedFile = fileURL.lastPathComponent
-        let message = "\(time) - \(levelString) - \(cleanedFile).\(function):\(line) - \(object)"
+        let message = "\(time) - \(levelString) - \(cleanedFile).\(message.function):\(message.line) - \(message.object)"
 
         for output: LogOutput in outputs {
             output.printMessage(message)
         }
     }
-    
+        
     private func levelToString(_ level: Log.Level) -> String {
         switch(level) {
         case .error:
