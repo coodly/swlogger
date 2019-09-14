@@ -21,30 +21,27 @@ public class Log {
         case verbose = 0, debug, info, error, none
     }
 
-    public static var logLevel = Level.none
+    public static var level = Level.none
+    
+    private static let base = Logging(name: "App")
     
     public class func info<T>(_ object: T, file: String = #file, function: String = #function, line: Int = #line) {
-        sendMessage(object, file: file, function: function, line: line, at: .info)
+        base.info(object, file: file, function: function, line: line)
     }
 
     public class func debug<T>(_ object: T, file: String = #file, function: String = #function, line: Int = #line) {
-        sendMessage(object, file: file, function: function, line: line, at: .debug)
+        base.debug(object, file: file, function: function, line: line)
     }
     
     public class func error<T>(_ object: T, file: String = #file, function: String = #function, line: Int = #line) {
-        sendMessage(object, file: file, function: function, line: line, at: .error)
+        base.error(object, file: file, function: function, line: line)
     }
 
     public class func verbose<T>(_ object: T, file: String = #file, function: String = #function, line: Int = #line) {
-        sendMessage(object, file: file, function: function, line: line, at: .verbose)
+        base.verbose(object, file: file, function: function, line: line)
     }
     
     public class func add(output: LogOutput) {
         Logger.sharedInstance.add(output: output)
-    }
-    
-    private static func sendMessage<T>(_ object: T, file: String = #file, function: String = #function, line: Int = #line, at level: Log.Level) {
-        let message = Message(object: object, file: file, function: function, line: line, time: Date(), level: level)
-        Logger.sharedInstance.log(message: message)
     }
 }

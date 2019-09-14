@@ -19,21 +19,21 @@ import Foundation
 internal class Logger {
     internal static let sharedInstance = Logger()
     internal var outputs = [LogOutput]()
+    private var cleaned = [String: String]()
         
     internal func add(output: LogOutput) {
         outputs.append(output)
     }
     
     internal func log<T>(message: Message<T>) {
-        if message.level.rawValue < Log.logLevel.rawValue {
+        guard message.level.rawValue >= Log.level.rawValue else {
             return
         }
 
         let time = timeFormatter.string(from: message.time)
         let levelString = levelToString(message.level)
-        let fileURL = URL(fileURLWithPath: message.file, isDirectory: false)
-        let cleanedFile = fileURL.lastPathComponent
-        let message = "\(time) - \(levelString) - \(cleanedFile).\(message.function):\(message.line) - \(message.object)"
+        let cleanedFile = cleaned(path: message.file)
+        let message = "\(time) - \(message.logger) - \(levelString) - \(cleanedFile).\(message.function):\(message.line) - \(message.object)"
 
         for output: LogOutput in outputs {
             output.printMessage(message)
@@ -53,6 +53,17 @@ internal class Logger {
         default:
             return ""
         }
+    }
+    
+    private func cleaned(path: String) -> String {
+        if let existing = self.cleaned[path] {
+            return existing
+        }
+        
+        let fileURL = URL(fileURLWithPath: path, isDirectory: false)
+        let cleanedFile = fileURL.lastPathComponent
+        self.cleaned[path] = cleanedFile
+        return cleanedFile
     }
     
     private lazy var timeFormatter: DateFormatter = {

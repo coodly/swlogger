@@ -18,6 +18,7 @@ import Foundation
 
 internal struct Message<T> {
     let object: T
+    let logger: String
     let file: String
     let function: String
     let line: Int
