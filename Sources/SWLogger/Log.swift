@@ -44,4 +44,6 @@ public class Log {
     public class func add(output: LogOutput) {
         Logger.sharedInstance.add(output: output)
     }
+    
+    internal static let logger = Logging(name: "SWLogger")
 }

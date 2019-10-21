@@ -17,6 +17,12 @@
 import Foundation
 
 public class FileOutput: LogOutput {
+    public enum Keep: Equatable {
+        case forever
+        case days(Int)
+        case number(Int)
+    }
+    
     private var fileHandle: FileHandle!
     private let saveInDirectory: FileManager.SearchPathDirectory
     internal lazy var logsFolder: URL = {
@@ -43,8 +49,11 @@ public class FileOutput: LogOutput {
         return "\(appName)-"
     }()
 
-    public init(saveInDirectory: FileManager.SearchPathDirectory = .documentDirectory) {
+    public init(saveInDirectory: FileManager.SearchPathDirectory = .documentDirectory, keep: Keep = .forever) {
         self.saveInDirectory = saveInDirectory
+        DispatchQueue.global(qos: .background).async {
+            self.cleanOld(with: keep)
+        }
     }
     
     public func printMessage(_ message: String) {
@@ -103,4 +112,68 @@ public class FileOutput: LogOutput {
         formatter.dateFormat = "yyyy-MM-dd-HH-mm"
         return formatter
     }()
+    
+    private func cleanOld(with keep: Keep) {
+        if keep == .forever {
+            Log.logger.debug("Keeping all files")
+            return
+        }
+        
+        let files = listLogFiles()
+        Log.logger.debug("Have \(files.count) log files")
+        switch keep {
+        case .forever: break
+        case .days(let days):
+            Log.logger.debug("Removing older than \(days) days")
+            guard let after = Calendar(identifier: .gregorian).date(byAdding: .day, value: -days, to: Date()) else {
+                return
+            }
+            let removed = files.filter({ $0.creationDate < after })
+            remove(files: removed)
+        case .number(let number):
+            Log.logger.debug("Keep \(number) latest files")
+            guard files.count > number else {
+                return
+            }
+            
+            let suffix = Array(files.suffix(from: number))
+            remove(files: suffix)
+        }
+    }
+    
+    private func remove(files: [FileDate]) {
+        Log.debug("Will remove \(files.count) files")
+        for file in files {
+            DispatchQueue.global(qos: .background).async {
+                try? FileManager.default.removeItem(at: file.file)
+            }
+        }
+    }
+    
+    
+    private func listLogFiles() -> [FileDate] {
+        var withDate = [FileDate]()
+        do {
+            let paths = try FileManager.default.contentsOfDirectory(at: logsFolder, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
+            for path in paths {
+                do {
+                    let attr = try FileManager.default.attributesOfItem(atPath: path.path)
+                    if let date = attr[FileAttributeKey.creationDate] as? Date {
+                        withDate.append(FileDate(file: path, creationDate: date))
+                    }
+                } catch {
+                    Log.logger.error("List attributes error: \(error)")
+                }
+            }
+        } catch {
+            Log.logger.error("List log files error: \(error)")
+        }
+        
+        return withDate.sorted(by: { $0.creationDate > $1.creationDate })
+    }
+}
+
+private struct FileDate {
+    let file: URL
+    let creationDate: Date
 }
