@@ -48,9 +48,11 @@ public class FileOutput: LogOutput {
         
         return "\(appName)-"
     }()
+    private let proposedName: String?
 
-    public init(saveInDirectory: FileManager.SearchPathDirectory = .documentDirectory, keep: Keep = .forever) {
+    public init(saveInDirectory: FileManager.SearchPathDirectory = .documentDirectory, name: String? = nil, keep: Keep = .forever) {
         self.saveInDirectory = saveInDirectory
+        self.proposedName = name
         DispatchQueue.global(qos: .background).async {
             self.cleanOld(with: keep)
         }
@@ -69,8 +71,14 @@ public class FileOutput: LogOutput {
             return handle
         }
 
-        let time = dateFormatter.string(from: Date())
-        let fileURL = logsFolder.appendingPathComponent("\(appNamePrefix)\(time).txt")
+        let fileName: String
+        if let proposed = proposedName {
+            fileName = proposed
+        } else {
+            let time = dateFormatter.string(from: Date())
+            fileName = "\(appNamePrefix)\(time).txt"
+        }
+        let fileURL = logsFolder.appendingPathComponent(fileName)
         
         makeSureFileExists(fileURL)
         
