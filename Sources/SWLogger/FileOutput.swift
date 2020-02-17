@@ -16,7 +16,7 @@
 
 import Foundation
 
-public class FileOutput: LogOutput {
+open class FileOutput: LogOutput {
     public enum Keep: Equatable {
         case forever
         case days(Int)
@@ -58,7 +58,7 @@ public class FileOutput: LogOutput {
         }
     }
     
-    public func printMessage(_ message: String) {
+    open func printMessage(_ message: String) {
         let written = "\(message)\n"
         let data = written.data(using: .utf8) ?? "<- No UTF8 data ->\n".data(using: .utf8)
         if let handle = handle(), let write = data {
@@ -136,7 +136,7 @@ public class FileOutput: LogOutput {
             guard let after = Calendar(identifier: .gregorian).date(byAdding: .day, value: -days, to: Date()) else {
                 return
             }
-            let removed = files.filter({ $0.creationDate < after })
+            let removed = files.filter({ $0.creationDate! < after })
             remove(files: removed)
         case .number(let number):
             Log.logger.debug("Keep \(number) latest files")
@@ -149,7 +149,7 @@ public class FileOutput: LogOutput {
         }
     }
     
-    private func remove(files: [FileDate]) {
+    private func remove(files: [LogFile]) {
         Log.debug("Will remove \(files.count) files")
         for file in files {
             DispatchQueue.global(qos: .background).async {
@@ -159,15 +159,15 @@ public class FileOutput: LogOutput {
     }
     
     
-    private func listLogFiles() -> [FileDate] {
-        var withDate = [FileDate]()
+    public func listLogFiles() -> [LogFile] {
+        var withDate = [LogFile]()
         do {
             let paths = try FileManager.default.contentsOfDirectory(at: logsFolder, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
             for path in paths {
                 do {
                     let attr = try FileManager.default.attributesOfItem(atPath: path.path)
                     if let date = attr[FileAttributeKey.creationDate] as? Date {
-                        withDate.append(FileDate(file: path, creationDate: date))
+                        withDate.append(LogFile(file: path, creationDate: date))
                     }
                 } catch {
                     Log.logger.error("List attributes error: \(error)")
@@ -177,11 +177,26 @@ public class FileOutput: LogOutput {
             Log.logger.error("List log files error: \(error)")
         }
         
-        return withDate.sorted(by: { $0.creationDate > $1.creationDate })
+        return withDate.sorted(by: { $0.creationDate! > $1.creationDate! })
     }
 }
 
-private struct FileDate {
-    let file: URL
-    let creationDate: Date
+public struct LogFile {
+    public let name: String
+    public let file: URL
+    let creationDate: Date?
+}
+
+extension LogFile {
+    internal init(file: URL, creationDate: Date) {
+        name = file.lastPathComponent
+        self.file = file
+        self.creationDate = creationDate
+    }
+    
+    internal init(name: String, path: URL) {
+        self.name = name
+        self.file = path
+        creationDate = nil
+    }
 }
