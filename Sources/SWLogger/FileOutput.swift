@@ -25,19 +25,16 @@ open class FileOutput: LogOutput {
     
     private var fileHandle: FileHandle!
     private let saveInDirectory: FileManager.SearchPathDirectory
-    internal lazy var logsFolder: URL = {
-        let urls = FileManager.default.urls(for: self.saveInDirectory, in: .userDomainMask)
-        let last = urls.last!
-        let identifier = Bundle.main.bundleIdentifier!
-        let logsIdentifier = identifier + ".logs"
-        let logsFolder = last.appendingPathComponent(logsIdentifier)
-
-        do {
-            try FileManager.default.createDirectory(at: logsFolder, withIntermediateDirectories: true, attributes: nil)
-        } catch let error as NSError {
-            print("Create db folder error \(error)")
+    private let appGroup: String?
+    private lazy var appGroupFolder: URL? = {
+        guard let name = appGroup else {
+            return nil
         }
-        return logsFolder
+        
+        return FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: name)
+    }()
+    internal lazy var searchPathFolder: URL = {
+        FileManager.default.urls(for: self.saveInDirectory, in: .userDomainMask).last!
     }()
     private lazy var appNamePrefix: String = {
         let displayName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String
@@ -49,11 +46,33 @@ open class FileOutput: LogOutput {
         return "\(appName)-"
     }()
     private let proposedName: String?
+    private(set) lazy var logsFolder: URL = {
+        let used = appGroupFolder ?? searchPathFolder
+        let identifier = Bundle.main.bundleIdentifier!
+        let logsIdentifier = identifier + ".logs"
+        let logsFolder = used.appendingPathComponent(logsIdentifier)
 
-    public init(saveInDirectory: FileManager.SearchPathDirectory = .documentDirectory, name: String? = nil, keep: Keep = .forever) {
-        self.saveInDirectory = saveInDirectory
-        self.proposedName = name
-        DispatchQueue.global(qos: .background).async {
+        do {
+            try FileManager.default.createDirectory(at: logsFolder, withIntermediateDirectories: true, attributes: nil)
+        } catch {
+            print("Create db folder error \(error)")
+        }
+        return logsFolder
+    }()
+
+    public convenience init(appGroup: String, name: String? = nil, keep: Keep = .forever) {
+        self.init(appGroup: appGroup, directory: .documentDirectory, name: name, keep: keep)
+    }
+    
+    public convenience init(saveInDirectory: FileManager.SearchPathDirectory = .documentDirectory, name: String? = nil, keep: Keep = .forever) {
+        self.init(appGroup: nil, directory: saveInDirectory, name: name, keep: keep)
+    }
+    
+    private init(appGroup: String?, directory: FileManager.SearchPathDirectory, name: String?, keep: Keep) {
+        self.appGroup = appGroup
+        saveInDirectory = directory
+        proposedName = name
+        DispatchQueue.global(qos: .utility).async {
             self.cleanOld(with: keep)
         }
     }
