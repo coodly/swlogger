@@ -23,6 +23,11 @@ open class FileOutput: LogOutput {
         case number(Int)
     }
     
+    public enum FileTime {
+        case minuteBased
+        case dateBased
+    }
+    
     private var fileHandle: FileHandle!
     private let saveInDirectory: FileManager.SearchPathDirectory
     private let appGroup: String?
@@ -52,26 +57,25 @@ open class FileOutput: LogOutput {
         let logsIdentifier = identifier + ".logs"
         let logsFolder = used.appendingPathComponent(logsIdentifier)
 
-        do {
-            try FileManager.default.createDirectory(at: logsFolder, withIntermediateDirectories: true, attributes: nil)
-        } catch {
-            print("Create db folder error \(error)")
-        }
+        createFolder(logsFolder)
+
         return logsFolder
     }()
+    private let fileTime: FileTime
 
-    public convenience init(appGroup: String, name: String? = nil, keep: Keep = .forever) {
-        self.init(appGroup: appGroup, directory: .documentDirectory, name: name, keep: keep)
+    public convenience init(appGroup: String, name: String? = nil, fileTime: FileTime = .minuteBased, keep: Keep = .forever) {
+        self.init(appGroup: appGroup, directory: .documentDirectory, name: name, fileTime: fileTime, keep: keep)
     }
     
-    public convenience init(saveInDirectory: FileManager.SearchPathDirectory = .documentDirectory, name: String? = nil, keep: Keep = .forever) {
-        self.init(appGroup: nil, directory: saveInDirectory, name: name, keep: keep)
+    public convenience init(saveInDirectory: FileManager.SearchPathDirectory = .documentDirectory, name: String? = nil, fileTime: FileTime = .minuteBased, keep: Keep = .forever) {
+        self.init(appGroup: nil, directory: saveInDirectory, name: name, fileTime: fileTime, keep: keep)
     }
     
-    private init(appGroup: String?, directory: FileManager.SearchPathDirectory, name: String?, keep: Keep) {
+    private init(appGroup: String?, directory: FileManager.SearchPathDirectory, name: String?, fileTime: FileTime = .minuteBased, keep: Keep) {
         self.appGroup = appGroup
         saveInDirectory = directory
         proposedName = name
+        self.fileTime = fileTime
         DispatchQueue.global(qos: .utility).async {
             self.cleanOld(with: keep)
         }
@@ -121,7 +125,7 @@ open class FileOutput: LogOutput {
         
         do {
             try FileManager.default.createDirectory(at: path, withIntermediateDirectories: true, attributes: nil)
-        } catch let error as NSError {
+        } catch {
             print("Create logs folder error \(error)")
         }
     }
@@ -136,7 +140,12 @@ open class FileOutput: LogOutput {
     
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd-HH-mm"
+        switch fileTime {
+        case .dateBased:
+            formatter.dateFormat = "yyyy-MM-dd"
+        case .minuteBased:
+            formatter.dateFormat = "yyyy-MM-dd-HH-mm"
+        }
         return formatter
     }()
     
@@ -171,7 +180,7 @@ open class FileOutput: LogOutput {
     private func remove(files: [LogFile]) {
         Log.debug("Will remove \(files.count) files")
         for file in files {
-            DispatchQueue.global(qos: .background).async {
+            DispatchQueue.global(qos: .utility).async {
                 try? FileManager.default.removeItem(at: file.file)
             }
         }
