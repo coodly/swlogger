@@ -53,7 +53,6 @@ open class FileOutput: LogOutput {
     private let proposedName: String?
     private(set) lazy var logsFolder: URL = {
         let used = appGroupFolder ?? searchPathFolder
-        let identifier = Bundle.main.bundleIdentifier!
         let logsIdentifier = identifier + ".logs"
         let logsFolder = used.appendingPathComponent(logsIdentifier)
 
@@ -62,18 +61,20 @@ open class FileOutput: LogOutput {
         return logsFolder
     }()
     private let fileTime: FileTime
+    private let identifier: String
 
-    public convenience init(appGroup: String, name: String? = nil, fileTime: FileTime = .minuteBased, keep: Keep = .forever) {
-        self.init(appGroup: appGroup, directory: .documentDirectory, name: name, fileTime: fileTime, keep: keep)
+    public convenience init(appGroup: String, identifier: String = Bundle.main.bundleIdentifier!, name: String? = nil, fileTime: FileTime = .minuteBased, keep: Keep = .forever) {
+        self.init(appGroup: appGroup, directory: .documentDirectory, identifier: identifier, name: name, fileTime: fileTime, keep: keep)
     }
     
-    public convenience init(saveInDirectory: FileManager.SearchPathDirectory = .documentDirectory, name: String? = nil, fileTime: FileTime = .minuteBased, keep: Keep = .forever) {
-        self.init(appGroup: nil, directory: saveInDirectory, name: name, fileTime: fileTime, keep: keep)
+    public convenience init(saveInDirectory: FileManager.SearchPathDirectory = .documentDirectory, identifier: String = Bundle.main.bundleIdentifier!, name: String? = nil, fileTime: FileTime = .minuteBased, keep: Keep = .forever) {
+        self.init(appGroup: nil, directory: saveInDirectory, identifier: identifier, name: name, fileTime: fileTime, keep: keep)
     }
     
-    private init(appGroup: String?, directory: FileManager.SearchPathDirectory, name: String?, fileTime: FileTime = .minuteBased, keep: Keep) {
+    private init(appGroup: String?, directory: FileManager.SearchPathDirectory, identifier: String, name: String?, fileTime: FileTime = .minuteBased, keep: Keep) {
         self.appGroup = appGroup
         saveInDirectory = directory
+        self.identifier = identifier
         proposedName = name
         self.fileTime = fileTime
         DispatchQueue.global(qos: .utility).async {
