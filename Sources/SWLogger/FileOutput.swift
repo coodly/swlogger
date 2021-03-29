@@ -62,6 +62,8 @@ open class FileOutput: LogOutput {
     }()
     private let fileTime: FileTime
     private let identifier: String
+    private lazy var newLine = "\n".data(using: .utf8)!
+    private lazy var noDataMessage = "<- No UTF8 data ->".data(using: .utf8)!
 
     public convenience init(appGroup: String, identifier: String = Bundle.main.bundleIdentifier!, name: String? = nil, fileTime: FileTime = .minuteBased, keep: Keep = .forever) {
         self.init(appGroup: appGroup, directory: .documentDirectory, identifier: identifier, name: name, fileTime: fileTime, keep: keep)
@@ -83,11 +85,16 @@ open class FileOutput: LogOutput {
     }
     
     open func printMessage(_ message: String) {
-        let written = "\(message)\n"
-        let data = written.data(using: .utf8) ?? "<- No UTF8 data ->\n".data(using: .utf8)
-        if let handle = handle(), let write = data {
-            handle.write(write)
+        guard let handle = self.handle() else {
+            return
         }
+        
+        if let data = message.data(using: .utf8) {
+            handle.write(data)
+        } else {
+            handle.write(noDataMessage)
+        }
+        handle.write(newLine)
     }
     
     private func handle() -> FileHandle? {
