@@ -28,6 +28,8 @@ open class FileOutput: LogOutput {
         case dateBased
     }
     
+    private let queue = DispatchQueue(label: "com.coodly.logging.write.queue")
+    
     private var fileHandle: FileHandle!
     private let saveInDirectory: FileManager.SearchPathDirectory
     private let appGroup: String?
@@ -90,22 +92,37 @@ open class FileOutput: LogOutput {
         self.identifier = identifier
         proposedName = name
         self.fileTime = fileTime
-        DispatchQueue.global(qos: .utility).async {
+        
+        queue.async {
             self.cleanOld(with: keep)
         }
     }
     
+    public func trimmed(to lines: Int) {
+        queue.sync {
+            do {
+                let data = try Data(contentsOf: self.logFileURL)
+                let trimmed = data.tail(lines: lines)
+                try trimmed.write(to: self.logFileURL)
+            } catch {
+                print(error)
+            }
+        }
+    }
+    
     open func printMessage(_ message: String) {
-        guard let handle = self.handle() else {
-            return
+        queue.sync {
+            guard let handle = self.handle() else {
+                return
+            }
+            
+            if let data = message.data(using: .utf8) {
+                handle.write(data)
+            } else {
+                handle.write(noDataMessage)
+            }
+            handle.write(newLine)
         }
-        
-        if let data = message.data(using: .utf8) {
-            handle.write(data)
-        } else {
-            handle.write(noDataMessage)
-        }
-        handle.write(newLine)
     }
     
     private func handle() -> FileHandle? {
