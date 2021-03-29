@@ -28,7 +28,7 @@ open class FileOutput: LogOutput {
         case dateBased
     }
     
-    private let queue = DispatchQueue(label: "com.coodly.logging.write.queue")
+    private lazy var queue = DispatchQueue(label: "com.coodly.logging.write.queue-\(logFileURL.lastPathComponent)")
     
     private var fileHandle: FileHandle!
     private let saveInDirectory: FileManager.SearchPathDirectory
@@ -93,7 +93,7 @@ open class FileOutput: LogOutput {
         proposedName = name
         self.fileTime = fileTime
         
-        queue.async {
+        queue.sync {
             self.cleanOld(with: keep)
         }
     }
