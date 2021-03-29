@@ -64,6 +64,17 @@ open class FileOutput: LogOutput {
     private let identifier: String
     private lazy var newLine = "\n".data(using: .utf8)!
     private lazy var noDataMessage = "<- No UTF8 data ->".data(using: .utf8)!
+    private lazy var logFileURL: URL = {
+        let fileName: String
+        if let proposed = proposedName {
+            fileName = proposed
+        } else {
+            let time = dateFormatter.string(from: Date())
+            fileName = "\(appNamePrefix)\(time).txt"
+        }
+        
+        return logsFolder.appendingPathComponent(fileName)
+    }()
 
     public convenience init(appGroup: String, identifier: String = Bundle.main.bundleIdentifier!, name: String? = nil, fileTime: FileTime = .minuteBased, keep: Keep = .forever) {
         self.init(appGroup: appGroup, directory: .documentDirectory, identifier: identifier, name: name, fileTime: fileTime, keep: keep)
@@ -102,19 +113,10 @@ open class FileOutput: LogOutput {
             return handle
         }
 
-        let fileName: String
-        if let proposed = proposedName {
-            fileName = proposed
-        } else {
-            let time = dateFormatter.string(from: Date())
-            fileName = "\(appNamePrefix)\(time).txt"
-        }
-        let fileURL = logsFolder.appendingPathComponent(fileName)
-        
-        makeSureFileExists(fileURL)
+        makeSureFileExists(logFileURL)
         
         do {
-            let opened: FileHandle = try FileHandle(forWritingTo: fileURL)
+            let opened: FileHandle = try FileHandle(forWritingTo: logFileURL)
             opened.seekToEndOfFile()
             fileHandle = opened
                 
@@ -214,6 +216,15 @@ open class FileOutput: LogOutput {
         }
         
         return withDate.sorted(by: { $0.creationDate! > $1.creationDate! })
+    }
+    
+    public func tail(lines: Int) -> Data? {
+        do {
+            let data = try Data(contentsOf: logFileURL)
+            return data.tail(lines: lines)
+        } catch {
+            return nil
+        }
     }
 }
 
