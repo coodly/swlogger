@@ -38,7 +38,11 @@ open class FileOutput: LogOutput {
             return nil
         }
         
+        #if os(macOS) || os(iOS)
         return FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: name)
+        #else
+        fatalError()
+        #endif
     }()
     internal lazy var searchPathFolder: URL = {
         FileManager.default.urls(for: self.saveInDirectory, in: .userDomainMask).last!
