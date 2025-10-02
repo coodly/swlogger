@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
+import ConcurrencyExtras
 import Foundation
 
-public class Log {
-  public enum Level: Int {
+public final class Log: Sendable {
+  public enum Level: Int, Sendable {
     case verbose = 0, debug, info, error, none
   }
 
-  public static var level = Level.none
+  public static let level = LockIsolated(Level.none)
+  
+  public static func set(level marked: Log.Level) {
+    level.setValue(marked)
+  }
 
   private static let base = Logging(name: "App")
 

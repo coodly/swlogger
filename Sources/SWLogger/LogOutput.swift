@@ -16,6 +16,10 @@
 
 import Foundation
 
-public protocol LogOutput {
-  func printMessage(_ message:String)
+public struct LogOutput: Sendable {
+  public let printMessage: @Sendable (String) -> Void
+  
+  public init(printMessage: @escaping @Sendable (String) -> Void) {
+    self.printMessage = printMessage
+  }
 }

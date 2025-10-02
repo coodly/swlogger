@@ -15,16 +15,17 @@
  */
 
 import Foundation
+import ConcurrencyExtras
 
-internal class Logger {
+internal final class Logger: Sendable {
   internal static let sharedInstance = Logger()
-  internal var outputs = [LogOutput]()
-  private var cleaned = [String: String]()
+  private let outputs: LockIsolated<[LogOutput]> = LockIsolated([])
+  private let cleaned: LockIsolated<Dictionary<String, String>> = LockIsolated(Dictionary())
         
   private let queue = DispatchQueue(label: "com.coodly.logging.queue")
     
   internal func add(output: LogOutput) {
-    outputs.append(output)
+    outputs.setValue(outputs.value + [output])
   }
     
   internal func log<T>(message: Message<T>) {
@@ -38,7 +39,7 @@ internal class Logger {
       let cleanedFile = cleaned(path: message.file)
       let message = "\(time) - \(message.logger) - \(levelString) - \(cleanedFile).\(message.function):\(message.line) - \(message.object)"
 
-      for output: LogOutput in outputs {
+      for output in outputs.value {
         output.printMessage(message)
       }
     }
@@ -60,19 +61,27 @@ internal class Logger {
   }
     
   private func cleaned(path: String) -> String {
-    if let existing = self.cleaned[path] {
+    if let existing = self.cleaned.value[path] {
       return existing
     }
         
     let fileURL = URL(fileURLWithPath: path, isDirectory: false)
     let cleanedFile = fileURL.lastPathComponent
-    self.cleaned[path] = cleanedFile
+    self.cleaned.setValue(cleaned.value.adding(key: path, value: cleanedFile))
     return cleanedFile
   }
     
-  private lazy var timeFormatter: DateFormatter = {
+  private let timeFormatter: DateFormatter = {
     let formatter = DateFormatter()
     formatter.dateFormat = "HH:mm:ss.SSS"
     return formatter
   }()
+}
+
+extension Dictionary where Key == String, Value == String {
+  func adding(key: String, value: String) -> Self {
+    var modified = self
+    modified[key] = value
+    return modified
+  }
 }

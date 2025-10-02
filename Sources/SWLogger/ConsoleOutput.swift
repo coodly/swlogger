@@ -16,12 +16,8 @@
 
 import Foundation
 
-public class ConsoleOutput: LogOutput {
-  public init() {
-
-  }
-
-  public func printMessage(_ message: String) {
-    print(message)
-  }
+extension LogOutput {
+  public static let console = LogOutput(
+    printMessage: { print($0) }
+  )
 }

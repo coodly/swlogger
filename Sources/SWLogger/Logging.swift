@@ -16,7 +16,7 @@
 
 import Foundation
 
-public class Logging {
+public final class Logging: Sendable {
   private let name: String
   public init(name: String) {
     self.name = name
