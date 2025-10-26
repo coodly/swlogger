@@ -8,6 +8,7 @@ private let concurrency = Target.Dependency.product(name: "ConcurrencyExtras", p
 let package = Package(
   name: "SWLogger",
   platforms: [
+    .iOS(.v17),
     .macOS(.v14)
   ],
   products: [

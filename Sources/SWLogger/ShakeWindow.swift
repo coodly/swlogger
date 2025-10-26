@@ -34,9 +34,9 @@
     }
 
     private func presentMailController() {
-      let logsController = LogsViewController()
-      let navigation = UINavigationController(rootViewController: logsController)
-      rootViewController?.present(navigation, animated: true, completion: nil)
+      //let logsController = LogsViewController()
+      //let navigation = UINavigationController(rootViewController: logsController)
+      //rootViewController?.present(navigation, animated: true, completion: nil)
     }
   }
 #endif
