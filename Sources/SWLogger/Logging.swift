@@ -39,12 +39,13 @@ public final class Logging: Sendable {
   }
 
   private func sendMessage<T>(_ object: T, file: String = #file, function: String = #function, line: Int = #line, at level: Log.Level, extra: ((Logging) -> Void)? = nil) {
-    let message = Message(object: object, logger: name, file: file, function: function, line: line, time: Date(), level: level)
-    Logger.sharedInstance.log(message: message)
-    guard level.rawValue >= Log.level.rawValue, let extra = extra else {
+    guard level.rawValue >= Log.level.rawValue else {
       return
     }
-
-    extra(self)
+    let message = Message(object: object, logger: name, file: file, function: function, line: line, time: Date(), level: level)
+    Logger.sharedInstance.log(message: message)
+    if let extra {
+      extra(self)
+    }
   }
 }

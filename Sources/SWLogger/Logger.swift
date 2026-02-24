@@ -21,26 +21,20 @@ internal final class Logger: Sendable {
   internal static let sharedInstance = Logger()
   private let outputs: LockIsolated<[LogOutput]> = LockIsolated([])
   private let cleaned: LockIsolated<Dictionary<String, String>> = LockIsolated(Dictionary())
-        
-  private let queue = DispatchQueue(label: "com.coodly.logging.queue")
-    
+
   internal func add(output: LogOutput) {
-    outputs.setValue(outputs.value + [output])
+    outputs.withValue { $0.append(output) }
   }
-    
+
   internal func log<T>(message: Message<T>) {
-    queue.sync {
-      guard message.level.rawValue >= Log.level.rawValue else {
-        return
-      }
+    let time = timeFormatter.string(from: message.time)
+    let levelString = levelToString(message.level)
+    let cleanedFile = cleaned(path: message.file)
+    let formatted = "\(time) - \(message.logger) - \(levelString) - \(cleanedFile).\(message.function):\(message.line) - \(message.object)"
 
-      let time = timeFormatter.string(from: message.time)
-      let levelString = levelToString(message.level)
-      let cleanedFile = cleaned(path: message.file)
-      let message = "\(time) - \(message.logger) - \(levelString) - \(cleanedFile).\(message.function):\(message.line) - \(message.object)"
-
-      for output in outputs.value {
-        output.printMessage(message)
+    outputs.withValue { outputs in
+      for output in outputs {
+        output.printMessage(formatted)
       }
     }
   }
